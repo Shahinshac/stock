@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, UserCircle, Loader2 } from 'lucide-react';
+import { Search, Bell, UserCircle, Loader2, LogOut } from 'lucide-react';
 import { useMarketStore } from '../store/marketStore';
+import { useAuthStore } from '../store/authStore';
 import { searchYahooFinance, fetchAssetChartData } from '../services/yahooFinanceService';
 import type { YahooSearchResult } from '../services/yahooFinanceService';
 
@@ -11,6 +12,7 @@ export const Topbar = ({ onViewChange }: { onViewChange: (view: string) => void 
   
   const setSelectedAsset = useMarketStore(state => state.setSelectedAsset);
   const loadDynamicAsset = useMarketStore(state => state.loadDynamicAsset);
+  const { user, logout } = useAuthStore();
 
   useEffect(() => {
     if (!query || query.length < 2) {
@@ -95,13 +97,23 @@ export const Topbar = ({ onViewChange }: { onViewChange: (view: string) => void 
       </div>
 
       <div className="flex items-center gap-4">
-        <button className="p-2 text-slate-400 hover:text-white transition-colors relative">
+        <button className="p-2 text-slate-400 hover:text-white transition-colors relative" title="Notifications">
           <Bell className="w-5 h-5" />
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
         </button>
-        <button className="p-2 text-slate-400 hover:text-white transition-colors">
-          <UserCircle className="w-6 h-6" />
-        </button>
+        <div className="flex items-center gap-2 pl-4 border-l border-slate-700">
+          <div className="text-right hidden sm:block">
+            <div className="text-sm text-white font-medium">{user?.email?.split('@')[0]}</div>
+            <div className="text-xs text-slate-400">{user?.isMock ? 'Local Account' : 'Cloud Sync Active'}</div>
+          </div>
+          <button 
+            onClick={() => logout()}
+            className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+            title="Disconnect"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -6,6 +6,8 @@ import { StockTracker } from './components/StockTracker';
 import { CurrencyConverter } from './components/CurrencyConverter';
 import { Watchlist } from './components/Watchlist';
 import { ProfessionalChart } from './components/ProfessionalChart';
+import { Auth } from './components/Auth';
+import { useAuthStore } from './store/authStore';
 
 import { initCryptoStream } from './services/cryptoService';
 import { fetchFiatRates, startFiatSimulation } from './services/fiatService';
@@ -13,8 +15,10 @@ import { initStockSimulation } from './services/stockService';
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
+  const user = useAuthStore(state => state.user);
 
   useEffect(() => {
+    if (!user) return; // Only init data if authenticated
     // Initialize all data services on mount
     initCryptoStream();
     
@@ -23,7 +27,11 @@ function App() {
     });
 
     initStockSimulation();
-  }, []);
+  }, [user]);
+
+  if (!user) {
+    return <Auth />;
+  }
 
   return (
     <Layout activeView={activeView} onViewChange={setActiveView}>

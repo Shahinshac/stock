@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface CryptoData {
   symbol: string;
@@ -38,13 +39,15 @@ interface MarketState {
   loadDynamicAsset: (asset: { symbol: string, name: string, price: number, changePercent: number, history: any[], currency: string }) => void;
 }
 
-export const useMarketStore = create<MarketState>((set) => ({
-  crypto: {},
-  fiat: {},
-  stocks: {},
-  selectedAssetId: null,
+export const useMarketStore = create<MarketState>()(
+  persist(
+    (set) => ({
+      crypto: {},
+      fiat: {},
+      stocks: {},
+      selectedAssetId: null,
 
-  setSelectedAsset: (id) => set({ selectedAssetId: id }),
+      setSelectedAsset: (id) => set({ selectedAssetId: id }),
 
   updateCrypto: (symbol, data) => set((state) => {
     const prev = state.crypto[symbol];
@@ -115,6 +118,11 @@ export const useMarketStore = create<MarketState>((set) => ({
         isUp: asset.changePercent >= 0,
       }
     },
-    selectedAssetId: asset.symbol
-  })),
-}));
+      selectedAssetId: asset.symbol
+    })),
+  }),
+  {
+    name: 'omnifi-market-storage',
+    partialize: (state) => ({ stocks: state.stocks }), // Only persist stocks (which includes dynamic assets)
+  }
+));
