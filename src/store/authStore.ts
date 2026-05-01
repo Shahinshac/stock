@@ -8,12 +8,33 @@ interface AuthState {
   loginWithGoogle: () => Promise<boolean>;
   logout: () => Promise<void>;
   register: (email: string, password?: string) => Promise<boolean>;
+  initAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+
+      initAuth: () => {
+        if (hasSupabaseKeys && supabase) {
+          // Check active session immediately
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user) {
+              set({ user: { id: session.user.id, email: session.user.email || '', isMock: false } });
+            }
+          });
+
+          // Listen for OAuth redirects and auth changes
+          supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+              set({ user: { id: session.user.id, email: session.user.email || '', isMock: false } });
+            } else {
+              set({ user: null });
+            }
+          });
+        }
+      },
 
       login: async (email, password) => {
         if (hasSupabaseKeys && supabase) {

@@ -16,6 +16,11 @@ import { initStockSimulation } from './services/stockService';
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const user = useAuthStore(state => state.user);
+  const initAuth = useAuthStore(state => state.initAuth);
+
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
 
   useEffect(() => {
     if (!user) return; // Only init data if authenticated
