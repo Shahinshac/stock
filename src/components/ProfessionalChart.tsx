@@ -1,5 +1,5 @@
-import React from 'react';
 import { useMarketStore } from '../store/marketStore';
+import type { StockData, CryptoData } from '../store/marketStore';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export const ProfessionalChart = () => {
@@ -18,7 +18,7 @@ export const ProfessionalChart = () => {
     );
   }
 
-  const asset = stocks[selectedAssetId] || crypto[selectedAssetId];
+  const asset = (stocks[selectedAssetId] as StockData | undefined) || (crypto[selectedAssetId] as CryptoData | undefined);
   if (!asset) return null;
 
   const isStock = 'currency' in asset;
@@ -26,7 +26,7 @@ export const ProfessionalChart = () => {
   const change = isStock ? asset.changePercent : asset.change24h;
   const isUp = change >= 0;
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-xl">
