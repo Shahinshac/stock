@@ -9,10 +9,13 @@ export interface YahooSearchResult {
 export const searchYahooFinance = async (query: string): Promise<YahooSearchResult[]> => {
   if (!query) return [];
   try {
-    const targetUrl = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=8&newsCount=0`;
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+    const res = await fetch(`/api/yahoo-search?q=${encodeURIComponent(query)}`);
     
-    const res = await fetch(proxyUrl);
+    if (!res.ok) {
+      console.error(`Search failed with status: ${res.status}`);
+      return [];
+    }
+
     const data = await res.json();
     
     if (data.quotes) {
@@ -33,11 +36,13 @@ export const searchYahooFinance = async (query: string): Promise<YahooSearchResu
 
 export const fetchAssetChartData = async (symbol: string) => {
   try {
-    // Fetch 1 day of 5-minute intervals
-    const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=5m`;
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+    const res = await fetch(`/api/yahoo-chart?symbol=${encodeURIComponent(symbol)}`);
     
-    const res = await fetch(proxyUrl);
+    if (!res.ok) {
+      console.warn(`Chart fetch failed for ${symbol} with status: ${res.status}`);
+      return null;
+    }
+
     const data = await res.json();
     
     const result = data.chart?.result?.[0];
